@@ -36,6 +36,14 @@ ReCheck:
 		}
 		vers.lastCheck = time.Now()
 
+		// if version is out yet, fill isOutyetChan with that status forever!
+		if status {
+			for {
+				vers.isOutyetChan <- status
+			}
+		}
+
+		// depending on wether the version is expected, have automatically updating or user triggered updating.
 		if vers.number == expectingVersion {
 			// update automatically every `updateInterval`
 			for {
