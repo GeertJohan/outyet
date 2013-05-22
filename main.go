@@ -47,6 +47,13 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// only handle requests on /
+	if r.RequestURI != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
+	// check if Host header matches isgo*.outyet.org
 	if !strings.HasSuffix(r.Host, ".outyet.org") || !strings.HasPrefix(r.Host, "isgo") {
 		log.Printf("Invalid host format detected. %s\n", r.Host)
 		http.Redirect(w, r, defaultPage, http.StatusTemporaryRedirect)
