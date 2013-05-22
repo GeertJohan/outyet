@@ -5,6 +5,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -28,6 +29,8 @@ var (
 	versionsLock sync.RWMutex                // map lock
 )
 
+var regexpNumber = regexp.MustCompile(`^[1-9](?:\.[0-9]){0,2}$`)
+
 func main() {
 	flag.Parse()
 
@@ -50,10 +53,13 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	numberFromHost := r.Host[4 : len(r.Host)-11]
-	log.Println(numberFromHost)
+	number := strings.Replace(r.Host[4:len(r.Host)-11], "point", ".", -1)
+	log.Println(number)
 
-	number := expectingVersion
+	if !regexpNumber.MatchString(number) {
+		http.Error(w, "invalid request format", http.StatusBadRequest)
+		return
+	}
 
 	// get right version in a safe way
 	o := getVersion(number)
