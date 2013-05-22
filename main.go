@@ -16,7 +16,7 @@ const (
 	updateInterval   = 6 * time.Second                                   // Update interval for the expected number
 )
 
-var defaultPage = "isgo" + strings.Replace(expectingVersion, ".", "point", -1) + ".outyet.org" //++ TODO(GeertJohan): strings replace "." to "point" ?
+var defaultPage = "http://isgo" + strings.Replace(expectingVersion, ".", "point", -1) + ".outyet.org" //++ TODO(GeertJohan): strings replace "." to "point" ?
 
 var (
 	totalHitCount   = expvar.NewInt("hitCountTotal")   // total amount of hits
@@ -32,7 +32,7 @@ func main() {
 	flag.Parse()
 
 	http.HandleFunc("/", rootHandler)
-	if err := http.ListenAndServe("localhost:8080", nil); err != nil {
+	if err := http.ListenAndServe("141.138.139.6:80", nil); err != nil {
 		log.Fatalln(err)
 	}
 }
@@ -40,16 +40,17 @@ func main() {
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	// redirect for 'old' domain
 	if r.Host == "isgo1point2outyet.com" {
-		http.Redirect(w, r, "isgo1point2.outyet.org", http.StatusTemporaryRedirect)
+		http.Redirect(w, r, "http://isgo1point2.outyet.org", http.StatusTemporaryRedirect)
 		return
 	}
 
-	if !strings.HasSuffix(r.Host, ".outyet.org") || !strings.HasPrefix("isgo", r.Host) {
+	if !strings.HasSuffix(r.Host, ".outyet.org") || !strings.HasPrefix(r.Host, "isgo") {
+		log.Printf("Invalid host format detected. %s\n", r.Host)
 		http.Redirect(w, r, defaultPage, http.StatusTemporaryRedirect)
 		return
 	}
 
-	numberFromHost := r.Host[4 : len(r.Header)-11]
+	numberFromHost := r.Host[4 : len(r.Host)-11]
 	log.Println(numberFromHost)
 
 	number := expectingVersion
