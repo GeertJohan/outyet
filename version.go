@@ -19,12 +19,12 @@ func (vers *version) run() {
 
 ReCheck:
 	for {
-		colVersions.Update(bson.M{"number": vers.number}, bson.M{"$inc": bson.M{"checks": 1}})
-		colNV.Update(bson.M{"name": "counts"}, bson.M{"$inc": bson.M{"checks": 1}})
+		colVersions.Upsert(bson.M{"number": vers.number}, bson.M{"$inc": bson.M{"checks": 1}})
+		colNV.Upsert(bson.M{"name": "counts"}, bson.M{"$inc": bson.M{"checks": 1}})
 		r, err := http.Head(changeURLBase + vers.number)
 		if err != nil {
 			log.Print(err)
-			colVersions.Update(bson.M{"number": vers.number}, bson.M{"$push": bson.M{"errors": err.Error()}})
+			colVersions.Upsert(bson.M{"number": vers.number}, bson.M{"$push": bson.M{"errors": err.Error()}})
 			status = false
 		} else {
 			status = r.StatusCode == http.StatusOK

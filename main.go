@@ -104,8 +104,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	o := getVersion(number)
 
 	// add hitCount's
-	colVersions.Update(bson.M{"number": o.number}, bson.M{"$inc": bson.M{"hits": 1}})
-	colNV.Update(bson.M{"name": "counts"}, bson.M{"$inc": bson.M{"hits": 1}})
+	colVersions.Upsert(bson.M{"number": o.number}, bson.M{"$inc": bson.M{"hits": 1}})
+	colNV.Upsert(bson.M{"name": "counts"}, bson.M{"$inc": bson.M{"hits": 1}})
 
 	// execute template
 	data := dataOutyet{
