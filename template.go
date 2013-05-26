@@ -34,7 +34,7 @@ var tmplOutyet = template.Must(template.New("outyet").Parse(`
 type dataStats struct {
 	TotalHits   int `bson:"hits"`
 	TotalChecks int `bson:"checks"`
-	Versions    []dataStatsVersion
+	Versions    []*dataStatsVersion
 }
 
 type dataStatsVersion struct {

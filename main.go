@@ -122,7 +122,7 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	data := &dataStats{}
 
 	colNV.Find(bson.M{"name": "counts"}).One(data)
-	colVersions.Find(nil).All(&data.Versions)
+	colVersions.Find(nil).Sort("number").All(&data.Versions)
 
 	for _, v := range data.Versions {
 		v.Outyet = <-getVersion(v.Number).isOutyetChan
