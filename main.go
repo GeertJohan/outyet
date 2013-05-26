@@ -1,8 +1,9 @@
 package main
 
 import (
-	"expvar"
-	"flag"
+	"github.com/jessevdk/go-flags"
+	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
 	"log"
 	"net/http"
 	"regexp"
@@ -20,27 +21,58 @@ const (
 var defaultPage = "http://isgo" + strings.Replace(expectingVersion, ".", "point", -1) + ".outyet.org" //++ TODO(GeertJohan): strings replace "." to "point" ?
 
 var (
-	totalHitCount   = expvar.NewInt("hitCountTotal")   // total amount of hits
-	totalCheckCount = expvar.NewInt("checkCountTotal") // total amount of checks
-)
-
-var (
 	versions     = make(map[string]*version) // map with all versions by number(string)
 	versionsLock sync.RWMutex                // map lock
 )
 
 var regexpNumber = regexp.MustCompile(`^[1-9](?:\.[0-9]){0,2}$`)
 
+var colVersions *mgo.Collection
+var colNV *mgo.Collection
+
+var options struct {
+	Listen string `short:"l" long:"listen" default:"141.138.139.6:80 description:"IP:post to listen on"`
+}
+
 func main() {
-	flag.Parse()
+	args, err := flags.Parse(&options)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	if len(args) > 0 {
+		log.Fatalln("Unexpected arguments.")
+	}
+
+	mgoSess, err := mgo.Dial("localhost")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	colVersions = mgoSess.DB("outyet").C("versions")
+	colVersions.EnsureIndex(mgo.Index{
+		Key:      []string{"number"},
+		Unique:   true,
+		DropDups: true,
+	})
+	colNV = mgoSess.DB("outyet").C("namevalue")
+	colNV.EnsureIndex(mgo.Index{
+		Key:      []string{"name"},
+		Unique:   true,
+		DropDups: true,
+	})
 
 	http.HandleFunc("/", rootHandler)
-	if err := http.ListenAndServe("141.138.139.6:80", nil); err != nil {
+	if err := http.ListenAndServe(options.Listen, nil); err != nil {
 		log.Fatalln(err)
 	}
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
+	// handler for stats page
+	if r.Host == "stats.outyet.org" {
+		statsHandler(w, r)
+		return
+	}
+
 	// redirect for 'old' domain
 	if r.Host == "isgo1point2outyet.com" {
 		http.Redirect(w, r, "http://isgo1point2.outyet.org", http.StatusTemporaryRedirect)
@@ -72,8 +104,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	o := getVersion(number)
 
 	// add hitCount's
-	totalHitCount.Add(1) // HL
-	o.hitCount.Add(1)    //HL
+	colVersions.Update(bson.M{"number": o.number}, bson.M{"$inc": bson.M{"hits": 1}})
+	colNV.Update(bson.M{"name": "counts"}, bson.M{"$inc": bson.M{"hits": 1}})
 
 	// execute template
 	data := dataOutyet{
@@ -81,6 +113,22 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		Version: number,
 	}
 	err := tmplOutyet.Execute(w, data)
+	if err != nil {
+		log.Print(err)
+	}
+}
+
+func statsHandler(w http.ResponseWriter, r *http.Request) {
+	data := &dataStats{}
+
+	colNV.Find(bson.M{"name": "counts"}).One(data)
+	colVersions.Find(nil).All(&data.Versions)
+
+	for _, v := range data.Versions {
+		v.Outyet = <-getVersion(v.Number).isOutyetChan
+	}
+
+	err := tmplStats.Execute(w, data)
 	if err != nil {
 		log.Print(err)
 	}

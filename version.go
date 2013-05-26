@@ -1,7 +1,7 @@
 package main
 
 import (
-	"expvar"
+	"labix.org/v2/mgo/bson"
 	"log"
 	"net/http"
 	"time"
@@ -9,13 +9,9 @@ import (
 
 // defines a number to check
 type version struct {
-	number          string         // version number to check
-	isOutyetChan    chan bool      // chan that tells wether the version has been tagged
-	lastCheck       time.Time      // last time this version was checked
-	hitCount        *expvar.Int    // total times this version was viewed
-	checkCount      *expvar.Int    // total times this version was checked
-	checkError      *expvar.String // last check error for this version
-	checkErrorCount *expvar.Int    // check error count for this version
+	number       string    // version number to check
+	isOutyetChan chan bool // chan that tells wether the version has been tagged
+	lastCheck    time.Time // last time this version was checked
 }
 
 func (vers *version) run() {
@@ -23,13 +19,12 @@ func (vers *version) run() {
 
 ReCheck:
 	for {
-		vers.checkCount.Add(1) // HL
-		totalCheckCount.Add(1) //HL
+		colVersions.Update(bson.M{"number": vers.number}, bson.M{"$inc": bson.M{"checks": 1}})
+		colNV.Update(bson.M{"name": "counts"}, bson.M{"$inc": bson.M{"checks": 1}})
 		r, err := http.Head(changeURLBase + vers.number)
 		if err != nil {
 			log.Print(err)
-			vers.checkError.Set(err.Error()) // HL
-			vers.checkErrorCount.Add(1)      // HL
+			colVersions.Update(bson.M{"number": vers.number}, bson.M{"$push": bson.M{"errors": err.Error()}})
 			status = false
 		} else {
 			status = r.StatusCode == http.StatusOK
@@ -83,13 +78,10 @@ func getVersion(number string) *version {
 	}
 	// create and insert version
 	o := &version{
-		number:          number,
-		isOutyetChan:    make(chan bool),
-		hitCount:        expvar.NewInt("hitCount" + number),
-		checkCount:      expvar.NewInt("checkCount" + number),
-		checkError:      expvar.NewString("pollError" + number),
-		checkErrorCount: expvar.NewInt("pollErrorCount" + number),
+		number:       number,
+		isOutyetChan: make(chan bool),
 	}
+	colVersions.Insert(bson.M{"number": o.number, "createTime": time.Now()})
 	go o.run()
 	versions[o.number] = o
 	// all done
