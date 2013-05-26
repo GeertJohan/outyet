@@ -31,7 +31,7 @@ var colVersions *mgo.Collection
 var colNV *mgo.Collection
 
 var options struct {
-	Listen string `short:"l" long:"listen" default:"141.138.139.6:80 description:"IP:post to listen on"`
+	Listen string `short:"l" long:"listen" default:"141.138.139.6:80" description:"IP:post to listen on"`
 }
 
 func main() {
