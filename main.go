@@ -109,8 +109,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 	// execute template
 	data := dataOutyet{
-		Outyet:  <-o.isOutyetChan, //retrieve outyet directly from channel
-		Version: number,
+		Outyet: <-o.isOutyetChan, //retrieve outyet directly from channel
+		Number: number,
 	}
 	err := tmplOutyet.Execute(w, data)
 	if err != nil {

@@ -6,22 +6,22 @@ import (
 )
 
 type dataOutyet struct {
-	Outyet  bool
-	Version string
+	Outyet bool
+	Number string
 }
 
 var tmplOutyet = template.Must(template.New("outyet").Parse(`
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>Is Go {{.Version}} out yet?</title>
+		<title>Is Go {{.Number}} out yet?</title>
 	</head>
 	<body>
 		<center>
-			<h2>Is Go {{.Version}} out yet?</h2>
+			<h2>Is Go {{.Number}} out yet?</h2>
 			<h1>
 			{{if .Outyet}}
-				<a href="` + changeURLBase + `{{.Version}}">YES!</a>
+				<a href="` + changeURLBase + `{{.Number}}">YES!</a>
 			{{else}}
 				No.
 			{{end}}
@@ -68,7 +68,7 @@ var tmplStats = template.Must(template.New("outyet").Parse(`
 					<td>{{.Number}}</td>
 					<td>
 						{{if .Outyet}}
-							<a href="` + changeURLBase + `{{.Version}}">yes</a>
+							<a href="` + changeURLBase + `{{.Number}}">yes</a>
 						{{else}}
 							no
 						{{end}}
