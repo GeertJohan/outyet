@@ -124,8 +124,13 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	colNV.Find(bson.M{"name": "counts"}).One(data)
 	colVersions.Find(nil).Sort("number").All(&data.Versions)
 
+	
 	for _, v := range data.Versions {
+		// get outyet for given version number
 		v.Outyet = <-getVersion(v.Number).isOutyetChan
+
+	    // add hitCount's
+    	colVersions.Upsert(bson.M{"number": v.Number}, bson.M{"$inc": bson.M{"hits": 1}})
 	}
 
 	err := tmplStats.Execute(w, data)
