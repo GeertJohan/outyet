@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	expectingVersion = "1.1.1"                                           // number being expected. must be changed manually (for now).
+	expectingVersion = "1.1.1 DISABLED"                                  // number being expected. must be changed manually (for now).
 	changeURLBase    = "https://code.google.com/p/go/source/detail?r=go" // base url to poll the tag
 	updateInterval   = 6 * time.Second                                   // Update interval for the expected number
 )
