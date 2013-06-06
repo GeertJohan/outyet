@@ -18,7 +18,7 @@ const (
 	updateInterval   = 6 * time.Second                                   // Update interval for the expected number
 )
 
-var defaultPage = "http://isgo" + strings.Replace(expectingVersion, ".", "point", -1) + ".outyet.org" //++ TODO(GeertJohan): strings replace "." to "point" ?
+var defaultPage = "http://isgo1point1point1.outyet.org"
 
 var (
 	versions     = make(map[string]*version) // map with all versions by number(string)
