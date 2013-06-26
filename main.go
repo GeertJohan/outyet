@@ -18,7 +18,7 @@ const (
 	updateInterval   = 6 * time.Second                                   // Update interval for the expected number
 )
 
-var defaultPage = "http://isgo1point1point1.outyet.org"
+var defaultPage = "http://isgo1point1point2.outyet.org"
 
 var (
 	versions     = make(map[string]*version) // map with all versions by number(string)
