@@ -99,6 +99,16 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if strings.HasSuffix(number, ".0") {
+		number = number[:len(number)-2]
+		if len(number) > 0 {
+			http.Redirect(w, r, "http://isgo"+strings.Replace(number, ".", "point", -1)+".outyet.org", code)
+			return
+		}
+		http.Redirect(w, r, defaultPage, http.StatusTemporaryRedirect)
+		return
+	}
+
 	// get right version in a safe way
 	o := getVersion(number)
 
