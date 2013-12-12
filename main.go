@@ -18,7 +18,7 @@ const (
 	updateInterval   = 6 * time.Second                                   // Update interval for the expected number
 )
 
-var defaultPage = "http://isgo1point2.outyet.org"
+var defaultPage = "http://isgo1point3.outyet.org"
 
 var (
 	versions     = make(map[string]*version) // map with all versions by number(string)
@@ -60,8 +60,7 @@ func main() {
 		DropDups: true,
 	})
 
-	http.HandleFunc("/", rootHandler)
-	if err := http.ListenAndServe(options.Listen, nil); err != nil {
+	if err := http.ListenAndServe(options.Listen, http.HandlerFunc(rootHandler)); err != nil {
 		log.Fatalln(err)
 	}
 }
@@ -124,13 +123,12 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	colNV.Find(bson.M{"name": "counts"}).One(data)
 	colVersions.Find(nil).Sort("number").All(&data.Versions)
 
-	
 	for _, v := range data.Versions {
 		// get outyet for given version number
 		v.Outyet = <-getVersion(v.Number).isOutyetChan
 
-	    // add hitCount's
-    	colVersions.Upsert(bson.M{"number": v.Number}, bson.M{"$inc": bson.M{"hits": 1}})
+		// add hitCount's
+		colVersions.Upsert(bson.M{"number": v.Number}, bson.M{"$inc": bson.M{"hits": 1}})
 	}
 
 	err := tmplStats.Execute(w, data)
