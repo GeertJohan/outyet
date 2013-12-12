@@ -102,7 +102,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	if strings.HasSuffix(number, ".0") {
 		number = number[:len(number)-2]
 		if len(number) > 0 {
-			http.Redirect(w, r, "http://isgo"+strings.Replace(number, ".", "point", -1)+".outyet.org", code)
+			http.Redirect(w, r, "http://isgo"+strings.Replace(number, ".", "point", -1)+".outyet.org", http.StatusTemporaryRedirect)
 			return
 		}
 		http.Redirect(w, r, defaultPage, http.StatusTemporaryRedirect)
