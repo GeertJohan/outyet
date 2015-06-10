@@ -1,21 +1,22 @@
 package main
 
 import (
-	"github.com/jessevdk/go-flags"
-	"labix.org/v2/mgo"
-	"labix.org/v2/mgo/bson"
 	"log"
 	"net/http"
 	"regexp"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/jessevdk/go-flags"
+	"labix.org/v2/mgo"
+	"labix.org/v2/mgo/bson"
 )
 
 const (
-	expectingVersion = "1.1.1 DISABLED"                                  // number being expected. must be changed manually (for now).
-	changeURLBase    = "https://code.google.com/p/go/source/detail?r=go" // base url to poll the tag
-	updateInterval   = 6 * time.Second                                   // Update interval for the expected number
+	expectingVersion = "1.1.1 DISABLED"                      // number being expected. must be changed manually (for now).
+	changeURLBase    = "https://go.googlesource.com/go/+/go" // base url to poll the tag
+	updateInterval   = 6 * time.Second                       // Update interval for the expected number
 )
 
 var defaultPage = "http://isgo1point5.outyet.org"
