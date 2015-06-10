@@ -26,7 +26,6 @@ var tmplOutyet = template.Must(template.New("outyet").Parse(`
 				No.
 			{{end}}
 			</h1>
-			<strong>outyet is currently not working correctly for Go1.5+, see <a href="https://github.com/GeertJohan/outyet/issues/2">github GeertJohan/outyet #2</a>.</strong>
 		</center>
 	</body>
 </html>
